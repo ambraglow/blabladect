@@ -14,9 +14,9 @@ namespace Busmail
                 else _txSeq = value;
             }
         }
-        public static uint RxSeq = 0;
+        public static uint RxSeq = _txSeq + 1;
 
-        public static BusMailFrame BuildFrame(FrameType type, byte[] data, bool pollFinal)
+        public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false)
         {
             BusMailFrame frame = new BusMailFrame
             {

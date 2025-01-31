@@ -15,7 +15,6 @@ namespace Busmail
         Unnumbered = 0xC0,
         Information = 0x00
     }
-
     public enum SupervisorId : byte
     {
         ReceiveReady = 0x00,
