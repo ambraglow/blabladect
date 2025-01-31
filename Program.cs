@@ -1,9 +1,21 @@
 ﻿using System;
-using System.Formats.Asn1;
-using System.Reflection.Metadata;
-using Busmail;
 
-Console.WriteLine("Hello, World!");
+namespace Busmail
+{
+    class Program
+    {
+        static ReadOnlySpan<byte> FrameData => new byte[] { 0x40, 0x05 };
 
-Message.Main();
+        static void Main()
+        {
+            var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
+            byte[] reconstructed = FrameBuilder.FrameToData(infoFrame);
 
+            var infoFrameTwo = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
+            byte[] reconstructedTwo = FrameBuilder.FrameToData(infoFrameTwo);
+
+            Console.WriteLine(BitConverter.ToString(reconstructed).Replace("-", " "));
+            Console.WriteLine(BitConverter.ToString(reconstructedTwo).Replace("-", " "));
+        }
+    }
+}
