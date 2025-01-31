@@ -27,6 +27,11 @@ namespace Busmail
         Unnumbered,
         Information
     }
+    internal enum SupervisorId {
+        ReceiveReady,
+        Reject,
+        ReceiveNotReady
+    }
     public enum Err
     {
         Success,
@@ -100,13 +105,8 @@ namespace Busmail
             return frame;
         }
         internal static void InformationHeader(ref byte Header, ref bool PollFinal){
-            Console.WriteLine("TxSeq: "+TxSeq+"Pollfinal: "+PollFinal);
-
-            byte TxSeqBits = (byte)(TxSeq);
-            TxSeqBits = (byte)(TxSeqBits << 3);
-
-            Console.WriteLine(TxSeqBits.ToString());
-
+            Console.WriteLine("TxSeq: "+TxSeq+" Pollfinal: "+PollFinal);
+            byte TxSeqBits = (byte)(TxSeq << 3);
             byte RxSeqBits = (byte)(RxSeq);
             
             switch(PollFinal) {
@@ -117,14 +117,17 @@ namespace Busmail
                     Header = (byte)(TxSeqBits | RxSeqBits);
                     break;
             }
-
-
             if(TxSeq == 7)
                 TxSeq = 0;
             else
                 TxSeq += 1;
         }
 
+        static BusMailFrame DissectFrame(){
+            BusMailFrame frame = new BusMailFrame();
+    
+            return frame;
+        }
         public static void Main() {
             //var SABMFrame = Message.BuildFrame(FrameType.Unnumbered, null);
             //byte[] reconstructedone = Message.BusMailFrameToData(SABMFrame);
