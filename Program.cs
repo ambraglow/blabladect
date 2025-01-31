@@ -1,21 +1,20 @@
 ﻿using System;
+using Busmail;
 
-namespace Busmail
+
+class Program
 {
-    class Program
+    static ReadOnlySpan<byte> FrameData => [ 0x40, 0x05 ];
+
+    static void Main()
     {
-        static ReadOnlySpan<byte> FrameData => new byte[] { 0x40, 0x05 };
+        var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
+        byte[] reconstructed = FrameBuilder.FrameToData(infoFrame);
 
-        static void Main()
-        {
-            var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
-            byte[] reconstructed = FrameBuilder.FrameToData(infoFrame);
+        var infoFrameTwo = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
+        byte[] reconstructedTwo = FrameBuilder.FrameToData(infoFrameTwo);
 
-            var infoFrameTwo = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
-            byte[] reconstructedTwo = FrameBuilder.FrameToData(infoFrameTwo);
-
-            Console.WriteLine(BitConverter.ToString(reconstructed).Replace("-", " "));
-            Console.WriteLine(BitConverter.ToString(reconstructedTwo).Replace("-", " "));
-        }
+        Console.WriteLine(BitConverter.ToString(reconstructed).Replace("-", " "));
+        Console.WriteLine(BitConverter.ToString(reconstructedTwo).Replace("-", " "));
     }
 }
