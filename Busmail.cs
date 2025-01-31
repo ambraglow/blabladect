@@ -20,12 +20,6 @@ namespace Busmail
         internal byte[] mail;
         internal byte Checksum;
     }
-   internal struct Mail {
-        internal byte programId;
-        internal byte TaskId;
-        internal ushort Primitive;
-        internal byte[] Parameters;
-    }
     internal enum FrameType {
         Supervisory,
         Unnumbered,
@@ -36,20 +30,18 @@ namespace Busmail
         Success,
         InvalidMessage
     }
-
     public class Message
     {
         static ReadOnlySpan<byte> FrameData => [0x40, 0x05];
         static internal uint TxSeq = 0;
         static internal uint RxSeq = 0;
-
         public Err read()
         {
-            return readImpl();
+            return Err.Success;
         }
         public Err write()
         {
-            return writeImpl();
+            return Err.Success;
         }
         static byte[] BusMailFrameToData(BusMailFrame frame)
         {
@@ -59,7 +51,6 @@ namespace Busmail
             data[0] = frame.FrameChar;
             data[1] = (byte)(frame.Length >> 8);
             data[2] = (byte)(frame.Length & 0xFF);
-            //Console.Write();
         
             data[3] = frame.Header;
 
@@ -118,13 +109,10 @@ namespace Busmail
             
             switch(PollFinal) {
                 case true:
-                    Header = 0x4;
-                    Header = (byte)(Header | TxSeqBits);
-                    Header = (byte)(Header | RxSeqBits);
+                    Header = (byte)(0x4 | TxSeqBits | RxSeqBits);
                     break;
                 case false:
-                    Header = TxSeqBits;
-                    Header = (byte)(Header | RxSeqBits);
+                    Header = (byte)(TxSeqBits | RxSeqBits);
                     break;
             }
 
@@ -149,8 +137,5 @@ namespace Busmail
             Console.WriteLine(BitConverter.ToString(reconstructedtwo).Replace("-", " "));
             Console.WriteLine(BitConverter.ToString(reconstructedThree).Replace("-", " "));
         }
-
-        protected virtual Err readImpl() => 0;
-        protected virtual Err writeImpl() => 0;
     }
 }
