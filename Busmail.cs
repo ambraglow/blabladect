@@ -22,15 +22,15 @@ namespace Busmail
         internal byte[] mail;
         internal byte Checksum;
     }
-    internal enum FrameType {
-        Supervisory,
-        Unnumbered,
-        Information
+    internal enum FrameType : byte {
+        Supervisory = 0x80,
+        Unnumbered  = 0xc0,
+        Information = 0x00
     }
-    internal enum SupervisorId {
-        ReceiveReady,
-        Reject,
-        ReceiveNotReady
+    internal enum SupervisorId : byte {
+        ReceiveReady = 0x00,
+        Reject = 0x08,
+        ReceiveNotReady = 0x18
     }
     public enum Err
     {
@@ -75,7 +75,7 @@ namespace Busmail
             frame.FrameChar = 0x10;
             switch(type) {
                 case FrameType.Supervisory:
-                    frame.Header = 0x00;
+                    frame.Header = (byte)FrameType.Supervisory | (byte)SupervisorId.ReceiveReady;
                     break;
                 case FrameType.Information:
                     // build information header
@@ -97,7 +97,7 @@ namespace Busmail
                     break;
                 case FrameType.Unnumbered:
                     // Unnumbered type header with PollFinal bit set
-                    frame.Header = 0xC8;
+                    frame.Header = (byte)FrameType.Unnumbered | 0x4;
                     frame.Length = 0x01;
                     frame.Checksum = 0xC8;
                     break;
