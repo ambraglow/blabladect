@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using Microsoft.VisualBasic;
+using System.IO.Ports;
+using System.ComponentModel.Design.Serialization;
 
 namespace Busmail
 {
@@ -32,6 +34,7 @@ namespace Busmail
     }
     public class Message
     {
+        internal SerialPort MessageBus = new SerialPort("COM0", 115200);
         static ReadOnlySpan<byte> FrameData => [0x40, 0x05];
         static internal uint TxSeq = 0;
         static internal uint RxSeq = 0;
@@ -80,9 +83,8 @@ namespace Busmail
                     frame.mail[1] = 0x01;
                     // Length
                     int size = frame.mail.Length + 1;   // frame length should be equal to mail size + header
-                    //Console.WriteLine("Mail size: "+size);
                     frame.Length = (ushort)(size);
-                    foreach (byte bytes in frame.mail)
+                    foreach (byte bytes in frame.mail)  // can't use Sum() method for a byte array i guess
                     {
                         frame.Checksum += bytes;
                     }
@@ -116,12 +118,12 @@ namespace Busmail
                     break;
             }
 
+
             if(TxSeq == 7)
                 TxSeq = 0;
             else
                 TxSeq += 1;
         }
-
 
         public static void Main() {
             //var SABMFrame = Message.BuildFrame(FrameType.Unnumbered, null);
