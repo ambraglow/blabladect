@@ -10,12 +10,10 @@ namespace Busmail
         {
             Serial = new SerialPort(portName, baudRate);
         }
-
         public Err Read()
         {
             return Err.Success;
         }
-
         public Err Write()
         {
             return Err.Success;

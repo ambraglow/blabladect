@@ -21,7 +21,6 @@ namespace Busmail
         Reject = 0x08,
         ReceiveNotReady = 0x18
     }
-
     public enum Err
     {
         Success,

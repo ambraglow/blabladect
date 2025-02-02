@@ -1,7 +1,6 @@
 ﻿using System;
 using Busmail;
 
-
 class Program
 {
     static ReadOnlySpan<byte> FrameData => [ 0x40, 0x05 ];
