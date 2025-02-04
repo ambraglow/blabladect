@@ -1,5 +1,6 @@
 ﻿using System;
 using Busmail;
+using API;
 
 class Program
 {
@@ -13,7 +14,15 @@ class Program
         var infoFrameTwo = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
         byte[] reconstructedTwo = FrameBuilder.FrameToData(infoFrameTwo);
 
-        Console.WriteLine(BitConverter.ToString(reconstructed).Replace("-", " "));
-        Console.WriteLine(BitConverter.ToString(reconstructedTwo).Replace("-", " "));
+        var SupervisoryFrame = FrameBuilder.BuildFrame(FrameType.Supervisory, null, false, SupervisorId.ReceiveReady);
+        byte[] reconstructedSupervisory = FrameBuilder.FrameToData(SupervisoryFrame);
+
+        var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
+        byte[] reconstructedSABM = FrameBuilder.FrameToData(SABM);
+
+        Console.WriteLine("Information frame 1: "+BitConverter.ToString(reconstructed).Replace("-", " "));
+        Console.WriteLine("Information frame 2: "+BitConverter.ToString(reconstructedTwo).Replace("-", " "));
+        Console.WriteLine("Supervisory frame: "+BitConverter.ToString(reconstructedSupervisory).Replace("-", " "));
+        Console.WriteLine("SABM frame: "+BitConverter.ToString(reconstructedSABM).Replace("-", " "));
     }
 }

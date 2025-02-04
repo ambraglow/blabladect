@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 
 namespace Busmail
 {
@@ -14,9 +15,9 @@ namespace Busmail
                 else _txSeq = value;
             }
         }
-        public static uint RxSeq = _txSeq + 1;
+        public static uint RxSeq = 0;
 
-        public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false)
+        public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false, SupervisorId Id = SupervisorId.ReceiveNotReady)
         {
             BusMailFrame frame = new BusMailFrame
             {
@@ -26,7 +27,20 @@ namespace Busmail
             switch (type)
             {
                 case FrameType.Supervisory:
-                    frame.Header = (byte)FrameType.Supervisory | (byte)SupervisorId.ReceiveReady;
+                    switch (Id)
+                    {
+                        case SupervisorId.ReceiveNotReady:
+                            frame.Header = (byte)((pollFinal ? 0x8 : 0x0) | (byte)FrameType.Supervisory | (byte)SupervisorId.ReceiveNotReady | (byte)RxSeq);
+                            break;
+                        case SupervisorId.ReceiveReady:
+                            frame.Header = (byte)((pollFinal ? 0x8 : 0x0) | (byte)FrameType.Supervisory | (byte)SupervisorId.ReceiveReady | (byte)RxSeq);
+                            break;
+                        case SupervisorId.Reject:
+                            frame.Header = (byte)((pollFinal ? 0x8 : 0x0) | (byte)FrameType.Supervisory | (byte)SupervisorId.Reject | (byte)RxSeq);
+                            break;
+                    }
+                    frame.Length = 0x0001;
+                    frame.Checksum = frame.Header;
                     break;
                 case FrameType.Information:
                     BuildInformationHeader(ref frame.Header, pollFinal);
@@ -38,9 +52,9 @@ namespace Busmail
                     frame.Checksum = CalculateChecksum(frame);
                     break;
                 case FrameType.Unnumbered:
-                    frame.Header = (byte)FrameType.Unnumbered | 0x4;
-                    frame.Length = 0x01;
-                    frame.Checksum = 0xC8;
+                    frame.Header = (byte)((byte)FrameType.Unnumbered | (pollFinal ? 0x8 : 0x0));
+                    frame.Length = 0x0001;
+                    frame.Checksum = frame.Header;
                     break;
             }
 
@@ -52,10 +66,10 @@ namespace Busmail
         private static void BuildInformationHeader(ref byte header, bool pollFinal)
         {
             Console.WriteLine($"TxSeq: {TxSeq}, PollFinal: {pollFinal}");
-            byte txSeqBits = (byte)(TxSeq << 3);
+            byte txSeqBits = (byte)(TxSeq << 4);
             byte rxSeqBits = (byte)RxSeq;
 
-            header = (byte)((pollFinal ? 0x4 : 0x0) | txSeqBits | rxSeqBits);
+            header = (byte)((pollFinal ? 0x8 : 0x0) | txSeqBits | rxSeqBits);
 
             TxSeq++;
         }
@@ -67,8 +81,11 @@ namespace Busmail
             data[1] = (byte)(frame.Length >> 8);
             data[2] = (byte)(frame.Length & 0xFF);
             data[3] = frame.Header;
-
-            Array.Copy(frame.Mail, 0, data, 4, frame.Mail.Length);
+            if(frame.Mail == null)
+            {}
+            else{
+                Array.Copy(frame.Mail, 0, data, 4, frame.Mail.Length);
+            }
             data[data.Length - 1] = frame.Checksum;
 
             return data;
