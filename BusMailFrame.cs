@@ -11,8 +11,8 @@ namespace Busmail
 
     public enum FrameType : byte
     {
-        Supervisory = 0x80,
-        Unnumbered = 0xC0,
+        Supervisory = (1<<7),
+        Unnumbered = (3<<6),
         Information = 0x00
     }
     public enum SupervisorId : byte
