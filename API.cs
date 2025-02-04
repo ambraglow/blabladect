@@ -54,4 +54,9 @@ namespace API {
         RSS_LOW_CREDITS = 0x33,
         RSS_MAX = 0xFF
     }
+
+    public enum API_HAL_CMD {
+        API_HAL_LED_RQ = 0x5902,
+        API_HAL_LED_CFM = 0x5903
+    }
 }

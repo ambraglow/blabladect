@@ -18,8 +18,8 @@ namespace Busmail
     public enum SupervisorId : byte
     {
         ReceiveReady = 0x00,
-        Reject = 0x10,
-        ReceiveNotReady = 0x30
+        Reject = (1<<4),
+        ReceiveNotReady = (3<<4)
     }
     public enum Err
     {

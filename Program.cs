@@ -4,26 +4,15 @@ using API;
 
 class Program
 {
-    static ReadOnlySpan<byte> FrameData => [ 0x40, 0x05 ];
+    static ReadOnlySpan<byte> Params => [0x02, 0x03, 0x01, 0x2C, 0x01, 0x00, 0x2C, 0x01, 0x02, 0x0A, 0x00];
 
     static void Main()
     {
         MessageBus bus = new MessageBus();
+        Thread.Sleep(100);
         MessageBusHandle.InitializeConnection(bus);
-
-        //var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
-        //FrameBuilder.FrameToData(infoFrame);
-
-        /*
-        var infoFrameTwo = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
-        byte[] reconstructedTwo = FrameBuilder.FrameToData(infoFrameTwo);
-
-        var SupervisoryFrame = FrameBuilder.BuildFrame(FrameType.Supervisory, null, false, SupervisorId.ReceiveReady);
-        byte[] reconstructedSupervisory = FrameBuilder.FrameToData(SupervisoryFrame);
-
-        var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
-        byte[] reconstructedSABM = FrameBuilder.FrameToData(SABM);
-        */
-
+        Thread.Sleep(500);
+        MessageBusHandle.InfoFrame(bus, (ushort)0x4002, true);
+        //MessageBusHandle.InfoFrame(bus, (ushort)API_HAL_CMD.API_HAL_LED_RQ, true, Params.ToArray());
     }
 }
