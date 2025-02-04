@@ -51,11 +51,18 @@ namespace Busmail
             MessageBus mb = new MessageBus();
             mb.Init();
             if(mb.MessageSABM == false && mb.lost != mb.max_outstanding){
+                Console.WriteLine("Connecting...");
                 var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
                 mb.SavedFrame = SABM;
                 FrameBuilder.FrameToData(SABM);
                 mb.Write();
                 HandleFrameIncoming(mb, true);
+                if(mb.MessageSABM == true){
+                    Console.WriteLine("Connected!");
+                }
+            }
+            else {
+                Console.WriteLine("Already connected!");
             }
 
         }
@@ -78,7 +85,11 @@ namespace Busmail
                 }
                 else{
                     //retransmit();
+                    //increase lost packets count
                 }
+            }
+            if(FrameData[4] == 0xC0){
+                mb.MessageSABM = true;
             }
 
             Console.WriteLine("frame read: "+BitConverter.ToString(FrameData).Replace("-", " "));
