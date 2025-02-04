@@ -8,9 +8,12 @@ class Program
 
     static void Main()
     {
-        var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
-        byte[] reconstructed = FrameBuilder.FrameToData(infoFrame);
+        MessageBusHandle.InitializeConnection();
 
+        //var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
+        //FrameBuilder.FrameToData(infoFrame);
+
+        /*
         var infoFrameTwo = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
         byte[] reconstructedTwo = FrameBuilder.FrameToData(infoFrameTwo);
 
@@ -19,6 +22,7 @@ class Program
 
         var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
         byte[] reconstructedSABM = FrameBuilder.FrameToData(SABM);
+        */
 
     }
 }

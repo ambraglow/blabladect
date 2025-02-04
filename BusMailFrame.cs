@@ -24,6 +24,7 @@ namespace Busmail
     public enum Err
     {
         Success,
-        InvalidMessage
+        InvalidMessage,
+        Invalid
     }
 }

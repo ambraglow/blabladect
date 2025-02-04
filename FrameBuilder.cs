@@ -1,6 +1,7 @@
 using System;
 using System.Data.Common;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks.Dataflow;
 
 namespace Busmail
 {
@@ -21,15 +22,6 @@ namespace Busmail
         public static uint RxSeq
         {
             get => TxSeq + 1;
-        }
-
-        private static BusMailFrame[] SavedFrame;
-        private static int max_outstanding = 7;
-        private static bool MessageSABM = false;
-
-
-        public static void InitializeConnection(){
-
         }
 
         public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false, SupervisorId Id = SupervisorId.ReceiveNotReady)
@@ -67,7 +59,6 @@ namespace Busmail
                     frame.Checksum = CalculateChecksum(frame);
                     break;
                 case FrameType.Unnumbered:
-                    MessageSABM = true;
                     frame.Header = (byte)((byte)FrameType.Unnumbered | (pollFinal ? 0x8 : 0x0));
                     frame.Length = 0x0001;
                     frame.Checksum = frame.Header;
