@@ -20,9 +20,5 @@ class Program
         var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
         byte[] reconstructedSABM = FrameBuilder.FrameToData(SABM);
 
-        Console.WriteLine("Information frame 1: "+BitConverter.ToString(reconstructed).Replace("-", " "));
-        Console.WriteLine("Information frame 2: "+BitConverter.ToString(reconstructedTwo).Replace("-", " "));
-        Console.WriteLine("Supervisory frame: "+BitConverter.ToString(reconstructedSupervisory).Replace("-", " "));
-        Console.WriteLine("SABM frame: "+BitConverter.ToString(reconstructedSABM).Replace("-", " "));
     }
 }
