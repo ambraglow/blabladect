@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.VisualBasic;
 using System.Timers;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Busmail
 {
@@ -10,7 +11,7 @@ namespace Busmail
     {
         public static byte[] ReadBus;
         public static byte[] WriteBus;
-        public BusMailFrame[] SavedFrame;
+        public BusMailFrame SavedFrame;
         public int max_outstanding = 7;
         public int lost = 0;
         public bool MessageSABM = false;
@@ -51,6 +52,7 @@ namespace Busmail
             mb.Init();
             if(mb.MessageSABM == false && mb.lost != mb.max_outstanding){
                 var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
+                mb.SavedFrame = SABM;
                 FrameBuilder.FrameToData(SABM);
                 mb.Write();
                 HandleFrameIncoming(mb, true);
@@ -75,7 +77,7 @@ namespace Busmail
                     break;
                 }
                 else{
-                    
+                    //retransmit();
                 }
             }
 
