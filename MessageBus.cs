@@ -47,24 +47,30 @@ namespace Busmail
     public static class MessageBusHandle 
     {
         public static System.Timers.Timer PFTimer = new (interval: 1000);
-        public static void InitializeConnection(){
-            MessageBus mb = new MessageBus();
-            mb.Init();
-            if(mb.MessageSABM == false && mb.lost != mb.max_outstanding){
+        public static void InitializeConnection(MessageBus bus){
+            bus.Init();
+            if(bus.MessageSABM == false && bus.lost != bus.max_outstanding){
                 Console.WriteLine("Connecting...");
                 var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
-                mb.SavedFrame = SABM;
+                bus.SavedFrame = SABM;
                 FrameBuilder.FrameToData(SABM);
-                mb.Write();
-                HandleFrameIncoming(mb, true);
-                if(mb.MessageSABM == true){
+                bus.Write();
+                HandleFrameIncoming(bus, true);
+                if(bus.MessageSABM == true){
                     Console.WriteLine("Connected!");
                 }
             }
-            else {
-                Console.WriteLine("Already connected!");
-            }
-
+        }
+        public static void InfoFrame(MessageBus bus, ushort primitive, bool PollFinal = false, byte[] parameters = null) {
+            var MailLength = sizeof(ushort) + parameters.Length;
+            byte[] data = new byte[MailLength];
+            data[0] = (byte)(primitive >> 8);
+            data[1] = (byte)(primitive & 0xFF);
+            Array.Copy(parameters, 0, data, 0, data.Length);
+            var InformationFrame = FrameBuilder.BuildFrame(FrameType.Information, data, false);
+            FrameBuilder.FrameToData(InformationFrame);
+            bus.Write();
+            HandleFrameIncoming(bus, false);
         }
         public static Err HandleFrameIncoming(MessageBus mb, bool PollFinal) {
             if(PollFinal == true){
@@ -75,7 +81,7 @@ namespace Busmail
             
             byte[] FrameData = new byte[10];
 
-            while(PFTimer.Enabled){
+            while(true){
                 mb.Read(1);
                 if(MessageBus.ReadBus[0] == 0x10){
                     FrameData[0] = 0x10;

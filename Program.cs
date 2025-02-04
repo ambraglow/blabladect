@@ -8,7 +8,8 @@ class Program
 
     static void Main()
     {
-        MessageBusHandle.InitializeConnection();
+        MessageBus bus = new MessageBus();
+        MessageBusHandle.InitializeConnection(bus);
 
         //var infoFrame = FrameBuilder.BuildFrame(FrameType.Information, FrameData.ToArray(), true);
         //FrameBuilder.FrameToData(infoFrame);
