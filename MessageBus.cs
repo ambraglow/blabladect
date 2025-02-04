@@ -15,7 +15,7 @@ namespace Busmail
         public int lost = 0;
         public bool MessageSABM = false;
         public bool TimerRunning = true;
-        private bool PollFinal;
+        public bool PollFinal;
 
         SerialPort Serial { get; set; }
 
@@ -53,13 +53,17 @@ namespace Busmail
                 var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
                 FrameBuilder.FrameToData(SABM);
                 mb.Write();
-                FrameHandle(mb);
+                HandleFrameIncoming(mb, true);
             }
 
         }
-        public static Err FrameHandle(MessageBus mb) {
-            PFTimer.Elapsed += (source, e) => TimerTimeout(source, e);
-            PFTimer.Enabled = true;
+        public static Err HandleFrameIncoming(MessageBus mb, bool PollFinal) {
+            if(PollFinal == true){
+                PFTimer.Elapsed += (source, e) => TimerTimeout(source, e);
+                PFTimer.Enabled = true;
+                PFTimer.Start();
+            }
+            
             byte[] FrameData = new byte[10];
 
             while(PFTimer.Enabled){
@@ -70,8 +74,12 @@ namespace Busmail
                     Array.Copy(MessageBus.ReadBus, 0, FrameData, 1, MessageBus.ReadBus.Length);
                     break;
                 }
+                else{
+                    
+                }
             }
-            
+
+            Console.WriteLine("frame read: "+BitConverter.ToString(FrameData).Replace("-", " "));
             
             return Err.Invalid;
         }
