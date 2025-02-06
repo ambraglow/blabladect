@@ -54,10 +54,10 @@ namespace Busmail
             bus.Init();
             if(bus.MessageSabm == false && bus.Lost != 7){
                 Console.WriteLine("Connecting...");
-                var SABM = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
-                bus.SavedFrame = SABM;
+                var sabmFrame = FrameBuilder.BuildFrame(FrameType.Unnumbered, null, true);
+                bus.SavedFrame = sabmFrame;
                 bus.PollFinal = true;
-                FrameBuilder.FrameToData(SABM);
+                FrameBuilder.FrameToData(sabmFrame);
                 bus.Write();
                 MessageBusInconming.HandleFrameIncoming(bus);
                 if(bus.MessageSabm == true){
@@ -135,8 +135,8 @@ namespace Busmail
             Console.WriteLine("Timer elapsed");
             if(bus.PollFinal == true){
                 bus.Lost++;
-                var FrameRetransmit = FrameBuilder.FrameToData(bus.SavedFrame); 
-                MessageBus.WriteBuf = FrameRetransmit;
+                var frameToRetransmit = FrameBuilder.FrameToData(bus.SavedFrame); 
+                MessageBus.WriteBuf = frameToRetransmit;
                 bus.Write();
             }
             _pfTimer.Stop();
