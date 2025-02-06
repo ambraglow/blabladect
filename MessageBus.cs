@@ -31,17 +31,17 @@ namespace Busmail
             Serial = new SerialPort(portName, baudRate);
         }
 
-        public Err Init(){
+        private Err Init(){
             Serial.Open();
             ReadBuf = new byte[50];
             return Err.Success;
         }
 
-        public void Read(int length, int offset)
+        internal void Read(int length, int offset)
         {   
             Serial.Read(ReadBuf, offset, length);
         }
-        public void Write()
+        internal void Write()
         {
             Serial.Write(WriteBuf, 0, WriteBuf.Length);
         }
@@ -77,8 +77,8 @@ namespace Busmail
             data[0] = (byte)(primitive & 0xFF);
             data[1] = (byte)(primitive >> 8);
             if(parameters != null) Array.Copy(parameters, 0, data, 2, parameters.Length); 
-            var InformationFrame = FrameBuilder.BuildFrame(FrameType.Information, data, pf);
-            FrameBuilder.FrameToData(InformationFrame);
+            var informationFrame = FrameBuilder.BuildFrame(FrameType.Information, data, pf);
+            FrameBuilder.FrameToData(informationFrame);
             bus.Write();
             MessageBusInconming.HandleFrameIncoming(bus);
         }
@@ -87,7 +87,7 @@ namespace Busmail
     internal static class MessageBusInconming 
     {
         private static System.Timers.Timer _pfTimer = new (interval: 1000);
-        public static byte[] frameData;
+        private static byte[] frameData;
         
         public static Err HandleFrameIncoming(MessageBus bus) {
             if(bus.PollFinal == true){
@@ -101,24 +101,24 @@ namespace Busmail
                 bus.Read(1, 0);    // continously read 1 byte from the serial port buffer
                 if(MessageBus.ReadBuf[0] == 0x10){  // check if the byte read is a frame delimeter
                     bus.Read(3, 1); // read 3 more bytes (length, header) at ReadBuf[1]
-                    int Length = MessageBus.ReadBuf[2] + 1;  // length for mail + checksum, we're only reading the upper byte of our length number 
-                    Console.WriteLine($"Length read from incoming frame: {Length} Header: {MessageBus.ReadBuf[3]}");
+                    int length = MessageBus.ReadBuf[2] + 1;  // length for mail + checksum, we're only reading the upper byte of our length number 
+                    Console.WriteLine($"Length read from incoming frame: {length} Header: {MessageBus.ReadBuf[3]}");
                     frameData = new byte[MessageBus.ReadBuf.Length];
                     switch (MessageBus.ReadBuf[3] & (3<<6)) {    // check the header
                         case (byte)FrameType.Unnumbered:
                             Console.WriteLine("Type Unnumbered control");
-                            bus.Read(Length, 4);
+                            bus.Read(length, 4);
                             Array.Copy(MessageBus.ReadBuf, 0, frameData, 0, MessageBus.ReadBuf.Length);
                             bus.MessageSabm = true;
                             break;
                         case (byte)FrameType.Information:
                             Console.WriteLine("Type Information");
-                            bus.Read(Length, 4);
+                            bus.Read(length, 4);
                             Array.Copy(MessageBus.ReadBuf, 0, frameData, 0, MessageBus.ReadBuf.Length);
                             break;
                         case (byte)FrameType.Supervisory:
                             Console.WriteLine("Type Supervisory control");
-                            bus.Read(Length, 4);
+                            bus.Read(length, 4);
                             Array.Copy(MessageBus.ReadBuf, 0, frameData, 0, MessageBus.ReadBuf.Length);
                             break;
                     }
