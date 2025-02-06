@@ -68,7 +68,7 @@ namespace API {
     
     public class API_HAL
     {
-        public enum Command : ushort
+        private enum Command : ushort
         {
             DEVICE_CONTROL_REQ = 0x5900,
             DEVICE_CONTROL_CFM,
@@ -90,24 +90,6 @@ namespace API {
             GET_GPIO_PORT_CFM
         }
 
-        public static void ApiHalReadReq(MessageBus bus, ApiHalAreaType area, uint Address, ushort Length)
-        {
-            command apiHalRead = new command(); 
-            apiHalRead.fields.Add((byte)area);
-            apiHalRead.fields.Add((byte)Address);
-            apiHalRead.fields.Add((byte)(Address >> 8));
-            apiHalRead.fields.Add((byte)(Address >> 0x10));
-            apiHalRead.fields.Add((byte)(Address >> 0x18));
-            apiHalRead.fields.Add((byte)(Length & 0xFF));
-            apiHalRead.fields.Add((byte)(Length >> 8));
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.READ_REQ, false, apiHalRead.fields.ToArray());
-        }
-
-        public static void ApiHalWrite()
-        {
-            
-        }
-
         public enum ApiHalDeviceIdType
         {
             AHD_NONE,
@@ -118,21 +100,13 @@ namespace API {
             AHD_TIM0,
             AHD_MAX
         }
-        
+
         public enum ApiHalDeviceControlType
         {
             AHC_NULL,
             AHC_DISABLE,
             AHC_ENABLE,
             AHC_MAX
-        }
-
-        public static void ApiHalDeviceControlReq(MessageBus bus, ApiHalDeviceControlType controlType, ApiHalDeviceIdType idType)
-        {
-            command apiHalDeviceControlReq = new command();
-            apiHalDeviceControlReq.fields.Add((byte)idType);
-            apiHalDeviceControlReq.fields.Add((byte)controlType);
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.DEVICE_CONTROL_REQ, false, apiHalDeviceControlReq.fields.ToArray());
         }
         
         public enum ApiHalLedCmdIdType : byte
@@ -142,28 +116,7 @@ namespace API {
             ALI_LED_REPEAT_SEQUENCE,
             ALI_LED_INVALID = 0xFF
         }
-
-        public static void ApiHalLedReq(MessageBus bus, int Led, command[] commands)
-        {
-            List<byte> Params = new List<byte>() {(byte)Led, (byte)commands.Length};
-            foreach (command cmd in commands)
-            {
-                Params.Add(cmd.fields[0]);
-                Params.Add(cmd.fields[1]);
-                Params.Add(cmd.fields[2]);
-            }
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.LED_REQ, false, Params.ToArray());
-        }
         
-        public static command ApiHalLedCmd(ApiHalLedCmdIdType id, int duration)
-        {
-            command apiHalLedCmd = new command();
-            apiHalLedCmd.fields.Add((byte)id);
-            apiHalLedCmd.fields.Add((byte)(duration & 0xFF));
-            apiHalLedCmd.fields.Add((byte)(duration >> 8));
-            return apiHalLedCmd;
-        }
-
         public enum ApiHalAreaType : byte
         {
             AHA_MEMORY,
@@ -211,6 +164,57 @@ namespace API {
         }
         // Types above come from the PP document
 
+        public static void ApiHalDeviceControlReq(MessageBus bus, ApiHalDeviceControlType controlType, ApiHalDeviceIdType idType)
+        {
+            var apiHalDeviceControlReq = new command();
+            apiHalDeviceControlReq.fields.Add((byte)idType);
+            apiHalDeviceControlReq.fields.Add((byte)controlType);
+            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.DEVICE_CONTROL_REQ, false, apiHalDeviceControlReq.fields.ToArray());
+        }
+        public static void ApiHalLedReq(MessageBus bus, int led, command[] commands)
+        {
+            List<byte> parameters = new List<byte>() {(byte)led, (byte)commands.Length};
+            foreach (var cmd in commands)
+            {
+                parameters.Add(cmd.fields[0]);
+                parameters.Add(cmd.fields[1]);
+                parameters.Add(cmd.fields[2]);
+            }
+            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.LED_REQ, false, parameters.ToArray());
+        }
+        public static command ApiHalLedCmd(ApiHalLedCmdIdType id, int duration)
+        {
+            var apiHalLedCmd = new command();
+            apiHalLedCmd.fields.Add((byte)id);
+            apiHalLedCmd.fields.Add((byte)(duration & 0xFF));
+            apiHalLedCmd.fields.Add((byte)(duration >> 8));
+            return apiHalLedCmd;
+        }
+        public static void ApiHalReadReq(MessageBus bus, ApiHalAreaType area, uint address, ushort length)
+        {
+            var apiHalRead = new command(); 
+            apiHalRead.fields.Add((byte)area);
+            apiHalRead.fields.Add((byte)address);
+            apiHalRead.fields.Add((byte)(address >> 8));
+            apiHalRead.fields.Add((byte)(address >> 0x10));
+            apiHalRead.fields.Add((byte)(address >> 0x18));
+            apiHalRead.fields.Add((byte)(length & 0xFF));
+            apiHalRead.fields.Add((byte)(length >> 8));
+            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.READ_REQ, false, apiHalRead.fields.ToArray());
+        }
+
+        public static void ApiHalWriteReq(MessageBus bus, ApiHalAreaType area, uint address, ushort length)
+        {
+            var apiHalRead = new command(); 
+            apiHalRead.fields.Add((byte)area);
+            apiHalRead.fields.Add((byte)address);
+            apiHalRead.fields.Add((byte)(address >> 8));
+            apiHalRead.fields.Add((byte)(address >> 0x10));
+            apiHalRead.fields.Add((byte)(address >> 0x18));
+            apiHalRead.fields.Add((byte)(length & 0xFF));
+            apiHalRead.fields.Add((byte)(length >> 8));
+            MessageBusOutgoing.InfoFrame(bus, (ushort)API_HAL.Command.WRITE_REQ, false, apiHalRead.fields.ToArray());
+        }
         
     }
 }
