@@ -7,9 +7,9 @@ namespace Busmail
 {
     public static class FrameBuilder
     {
-        public static byte PollFinalBit = (1<<3);
+        private static readonly byte PollFinalBit = (1<<3);
         private static uint _txSeq;
-        public static uint TxSeq
+        private static uint TxSeq
         {
             get => _txSeq;
             set
@@ -19,7 +19,6 @@ namespace Busmail
             }
         }
 
-        public static uint _rxSeq;
         private static uint RxSeq
         {
             get => TxSeq + 1;
@@ -31,7 +30,6 @@ namespace Busmail
             {
                 FrameChar = 0x10
             };
-
             switch (type)
             {
                 case FrameType.Supervisory:
@@ -65,7 +63,6 @@ namespace Busmail
                     frame.Checksum = frame.Header;
                     break;
             }
-
             return frame;
         }
 
@@ -75,31 +72,25 @@ namespace Busmail
         {
             //Console.WriteLine($"TxSeq: {TxSeq}, RxSeq: {RxSeq}, PollFinal: {pollFinal}");
             byte txSeqBits = (byte)(TxSeq << 4);
-
             header = (byte)((pollFinal ? PollFinalBit : 0x0) | txSeqBits | (byte)RxSeq);
-
             TxSeq++;
         }
 
         public static byte[] FrameToData(BusMailFrame frame)
         {
-            MessageBus.WriteBus = new byte[frame.Length + 4];
-            MessageBus.WriteBus[0] = frame.FrameChar;
-            MessageBus.WriteBus[1] = (byte)(frame.Length >> 8);
-            MessageBus.WriteBus[2] = (byte)(frame.Length & 0xFF);
-            MessageBus.WriteBus[3] = frame.Header;
-            if(frame.Mail == null)
-            {}
-            else{
-                Array.Copy(frame.Mail, 0, MessageBus.WriteBus, 4, frame.Mail.Length);
-            }
-            MessageBus.WriteBus[MessageBus.WriteBus.Length - 1] = frame.Checksum;
+            MessageBus.WriteBuf = new byte[frame.Length + 4];
+            MessageBus.WriteBuf[0] = frame.FrameChar;
+            MessageBus.WriteBuf[1] = (byte)(frame.Length >> 8);
+            MessageBus.WriteBuf[2] = (byte)(frame.Length & 0xFF);
+            MessageBus.WriteBuf[3] = frame.Header;
+            if(frame.Mail != null) Array.Copy(frame.Mail, 0, MessageBus.WriteBuf, 4, frame.Mail.Length);
+            MessageBus.WriteBuf[MessageBus.WriteBuf.Length - 1] = frame.Checksum;
 
-            byte[] message = MessageBus.WriteBus;
+            byte[] message = MessageBus.WriteBuf;
 
             Console.WriteLine("sending frame: "+BitConverter.ToString(message).Replace("-", " "));
 
-            return MessageBus.WriteBus;
+            return MessageBus.WriteBuf;
         }
     }
 }
