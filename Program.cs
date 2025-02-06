@@ -15,11 +15,13 @@ class Program
         //MessageBusHandle.InfoFrame(bus, (ushort)0x4002, true);
         //MessageBusHandle.InfoFrame(bus, (ushort)API_HAL.CMD.LED_REQ, true, Params.ToArray());
         
-        API.command[] Blink = new command[3]
-            {API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_ON, 500), 
+        API.command[] blink =
+        [
+            API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_ON, 500), 
                 API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_OFF, 500), 
-                API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_REPEAT_SEQUENCE, 10)};
-        API_HAL.ApiHalLedReq(bus, 2, Blink);
+                API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_REPEAT_SEQUENCE, 10)
+        ];
+        API_HAL.ApiHalLedReq(bus, 2, blink);
 
         API_HAL.ApiHalReadReq(bus, API_HAL.ApiHalAreaType.AHA_REGISTER, 0xFF481E, 2);
     }
