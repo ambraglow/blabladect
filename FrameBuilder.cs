@@ -7,7 +7,7 @@ namespace Busmail
 {
     public static class FrameBuilder
     {
-        private static readonly byte PollFinalBit = (1<<3);
+        private const byte PollFinalBit = (1 << 3);
         private static uint _txSeq;
         private static uint TxSeq
         {
@@ -19,10 +19,7 @@ namespace Busmail
             }
         }
 
-        private static uint RxSeq
-        {
-            get => TxSeq + 1;
-        }
+        private static uint RxSeq { get => TxSeq + 1; }
 
         public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false, SupervisorId Id = SupervisorId.ReceiveNotReady)
         {

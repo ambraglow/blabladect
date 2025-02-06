@@ -101,7 +101,7 @@ namespace Busmail
                 bus.Read(1, 0);    // continously read 1 byte from the serial port buffer
                 if(MessageBus.ReadBuf[0] == 0x10){  // check if the byte read is a frame delimeter
                     bus.Read(3, 1); // read 3 more bytes (length, header) at ReadBuf[1]
-                    int length = MessageBus.ReadBuf[2] + 1;  // length for mail + checksum, we're only reading the upper byte of our length number 
+                    var length = MessageBus.ReadBuf[2] + 1;  // length for mail + checksum, we're only reading the upper byte of our length number 
                     Console.WriteLine($"Length read from incoming frame: {length} Header: {MessageBus.ReadBuf[3]}");
                     frameData = new byte[MessageBus.ReadBuf.Length];
                     switch (MessageBus.ReadBuf[3] & (3<<6)) {    // check the header
