@@ -168,24 +168,27 @@ namespace API {
 
         public static void ApiFpGeneralGetVersion(MessageBus bus)
         {
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.GET_FW_VERSION_REQ);
+            Console.Write("Sending GetVersion command: ");
+            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.GET_FW_VERSION_REQ, false);
         }
 
         public static void ApiFpGeneralSetTime(MessageBus bus, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
         {
             var apiFpGeneralSetTime = new command();
-            apiFpGeneralSetTime.fields[0] = (byte)coding;
-            apiFpGeneralSetTime.fields[1] = (byte)interpretation;
+            apiFpGeneralSetTime.fields.Add((byte)coding);
+            apiFpGeneralSetTime.fields.Add((byte)interpretation);
             foreach (var elements in Enum.GetValues(typeof(ApiTimeDateCodingType)))
             {
                 apiFpGeneralSetTime.fields.Add((byte)elements);
             }
+            Console.Write("Sending ApiFpGeneralSetTime command: ");
             MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
         }
 
         public static void ApiFpGeneralGetTime(MessageBus bus)
         {
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.GET_TIME_REQ);
+            Console.Write("Sending ApiFpGeneralGetTime command: ");
+            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.GET_TIME_REQ, false);
         }
 
         public static void ApiFpGeneralSetTimeInd(MessageBus bus, ApiTerminalIdType terminalId, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
@@ -309,6 +312,7 @@ namespace API {
         }
         public static void ApiHalLedReq(MessageBus bus, int led, command[] commands)
         {
+            Console.Write("sending LedReq command: ");
             List<byte> parameters = new List<byte>() {(byte)led, (byte)commands.Length};
             foreach (var cmd in commands)
             {

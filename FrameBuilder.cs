@@ -7,9 +7,9 @@ namespace Busmail
 {
     public static class FrameBuilder
     {
-        private const byte PollFinalBit = (1 << 3);
+        public const byte PollFinalBit = (1 << 3);
         private static uint _txSeq;
-        private static uint TxSeq
+        public static uint TxSeq
         {
             get => _txSeq;
             set
@@ -19,7 +19,7 @@ namespace Busmail
             }
         }
 
-        private static uint RxSeq { get => TxSeq + 1; }
+        public static uint RxSeq { get => TxSeq + 1; }
 
         public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false, SupervisorId Id = SupervisorId.ReceiveNotReady)
         {
@@ -73,7 +73,7 @@ namespace Busmail
             TxSeq++;
         }
 
-        public static byte[] FrameToData(BusMailFrame frame)
+        public static byte[] SerializeFrame(BusMailFrame frame)
         {
             MessageBus.WriteBuf = new byte[frame.Length + 4];
             MessageBus.WriteBuf[0] = frame.FrameChar;
@@ -85,7 +85,9 @@ namespace Busmail
 
             byte[] message = MessageBus.WriteBuf;
 
-            Console.WriteLine("sending frame: "+BitConverter.ToString(message).Replace("-", " "));
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write(BitConverter.ToString(message).Replace("-", " ")+"\n");
+            Console.ResetColor();
 
             return MessageBus.WriteBuf;
         }
