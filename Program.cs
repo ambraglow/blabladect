@@ -9,11 +9,11 @@ class Program
     {
         MessageBus bus = new MessageBus();
         Thread.Sleep(100);
-        MessageBus.InitializeConnection(bus);
+        MessageBus.Connect(bus);
         Thread.Sleep(100);
         API_FP_GENERAL.ApiFpGeneralGetVersion(bus);
         
-        API.command[] blink =
+        API.Command[] blink =
         [
             API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_ON, 500), 
                 API_HAL.ApiHalLedCmd(API_HAL.ApiHalLedCmdIdType.ALI_LED_OFF, 500), 
@@ -21,6 +21,8 @@ class Program
         ];
         API_HAL.ApiHalLedReq(bus, 2, blink);
         
+        API_FP_MM.ApiFpMmGetIdReq(bus);
+        /*
         API_FP_GENERAL.ApiFpGeneralGetTime(bus);
 
         API_FP_GENERAL.ApiTimeDateCodeType time;
@@ -35,5 +37,6 @@ class Program
         API_FP_GENERAL.ApiFpGeneralSetTime(bus, API_FP_GENERAL.ApiTimeDateCodingType.API_CODING_TIME_DATE, API_FP_GENERAL.ApiTimeDateInterpretationType.API_INTER_CURRENT_TIME_DATE, time);
    
         API_FP_GENERAL.ApiFpGeneralGetTime(bus);
+        */
     }
 }

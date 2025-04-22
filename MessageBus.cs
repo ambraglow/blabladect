@@ -70,10 +70,7 @@ namespace Busmail
             Serial.DiscardInBuffer();
         }
 
-        public static void InitializeConnection(MessageBus bus){
-            //Thread t = new Thread(() => MessageBusIncoming.IncomingHeader(bus));
-            //t.Name = "Scanning header";
-            //t.Start();
+        public static void Connect(MessageBus bus){
             bus.Init();
 
             if(bus.Connected == false && bus.Lost != 6){
@@ -184,13 +181,13 @@ namespace Busmail
                         case (byte)FrameType.Information:
                             Console.WriteLine("Type Information");
                             bus.Read(length, 4);
-                            Array.Copy(MessageBus.ReadBuf, 4, bus.IncomingframeData.Mail, 0, length-1);
+                            Array.Copy(MessageBus.ReadBuf, 4, bus.IncomingframeData.Mail, 0, length-2);
                             bus.IncomingframeData.Checksum = MessageBus.ReadBuf[totallength];
                             break;
                         case (byte)FrameType.Supervisory:
                             Console.WriteLine("Type Supervisory control");
                             bus.Read(length, 4);
-                            Array.Copy(MessageBus.ReadBuf, 4, bus.IncomingframeData.Mail, 0, length-1);
+                            Array.Copy(MessageBus.ReadBuf, 4, bus.IncomingframeData.Mail, 0, length-2);
                             bus.IncomingframeData.Checksum = MessageBus.ReadBuf[totallength];
                             break;
                     }
@@ -205,7 +202,7 @@ namespace Busmail
             Console.Write(" Checksum: "+bus.IncomingframeData.Checksum.ToString("X")+"\n");
             Console.ResetColor();
 
-            IncomingHeader(bus);
+            //IncomingHeader(bus);
             return Err.Success;
         }
         public static void IncomingHeader(MessageBus bus) {
