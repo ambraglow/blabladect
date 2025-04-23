@@ -8,7 +8,6 @@ namespace Busmail
         public byte[] Mail;
         public byte Checksum;
     }
-
     public enum FrameType : byte
     {
         Supervisory = (1<<7),

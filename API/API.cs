@@ -1,6 +1,16 @@
 using Busmail;
+using HAL = API.API_HAL.API_HAL;
+using FPGen = API.API_FP_GENERAL.API_FP_GENERAL;
 
 namespace API {
+    public class API {
+        public FPGen fpgen;
+        public HAL hal;
+        public API(MessageBus bus) {
+            hal = new HAL(bus);
+            fpgen = new FPGen(bus);
+        }
+    }
     public class GeneralTypes
     {
         public enum RsStatusType : byte
@@ -60,7 +70,6 @@ namespace API {
             RSS_MAX = 0xFF
         }
     }
-
     public class Command
     {
         public List<byte> fields = new List<byte>();

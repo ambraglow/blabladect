@@ -1,9 +1,13 @@
 using Busmail;
 
-namespace API {
+namespace API.API_FP_GENERAL {
     public class API_FP_GENERAL
     {
-        private enum Command : ushort
+        private readonly MessageBus _bus;
+        public API_FP_GENERAL(MessageBus bus) {
+            _bus = bus;
+        }
+        internal enum command : ushort
         {
             // Management
             RESET_REQ = 0x4000,
@@ -94,18 +98,18 @@ namespace API {
             API_CODING_TIME_DATE
         }
                 
-        public static void ApiFpGeneralReset(MessageBus bus)
+        public static void ApiFpGeneralReset()
         {
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.RESET_REQ);
+            //MessageBus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.RESET_REQ);
         }
 
-        public static void ApiFpGeneralGetVersion(MessageBus bus)
+        public static void ApiFpGeneralGetVersion(API_FP_GENERAL fpgen)
         {
             Console.Write("Sending GetVersion command: ");
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.GET_FW_VERSION_REQ, false);
+            fpgen._bus._busout.InfoFrame((ushort)API_FP_GENERAL.command.GET_FW_VERSION_REQ, true);
         }
 
-        public static void ApiFpGeneralSetTime(MessageBus bus, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
+        public static void ApiFpGeneralSetTime(API_FP_GENERAL fpgen, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
         {
             var apiFpGeneralSetTime = new Command();
             apiFpGeneralSetTime.fields.Add((byte)coding);
@@ -115,16 +119,16 @@ namespace API {
                 apiFpGeneralSetTime.fields.Add((byte)elements);
             }
             Console.Write("Sending ApiFpGeneralSetTime Command: ");
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
+            fpgen._bus._busout.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
         }
 
-        public static void ApiFpGeneralGetTime(MessageBus bus)
+        public static void ApiFpGeneralGetTime()
         {
             Console.Write("Sending ApiFpGeneralGetTime Command: ");
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.GET_TIME_REQ, false);
+            //MessageBus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_TIME_REQ, false);
         }
 
-        public static void ApiFpGeneralSetTimeInd(MessageBus bus, ApiTerminalIdType terminalId, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
+        public static void ApiFpGeneralSetTimeInd(ApiTerminalIdType terminalId, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
         {
             var apiFpGeneralSetTimeInd = new Command();
             apiFpGeneralSetTimeInd.fields[0] = (byte)terminalId;
@@ -134,7 +138,7 @@ namespace API {
             {
                 apiFpGeneralSetTimeInd.fields.Add((byte)elements);
             }
-            MessageBusOutgoing.InfoFrame(bus, (ushort)API_FP_GENERAL.Command.SET_TIME_IND, false,apiFpGeneralSetTimeInd.fields.ToArray());
+            //MessageBus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_IND, false,apiFpGeneralSetTimeInd.fields.ToArray());
         }
     }
 

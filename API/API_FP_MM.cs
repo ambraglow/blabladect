@@ -1,7 +1,11 @@
 using Busmail;
 
-namespace API {
+namespace API.API_FP_MM {
     public class API_FP_MM {
+        private readonly MessageBus _bus;
+        public API_FP_MM(MessageBus bus) {
+            _bus = bus;
+        }
         private enum ManagementCommands : ushort {
             GET_ID_REQ = 0x4004,
             GET_ID_CFM,
@@ -50,10 +54,9 @@ namespace API {
             REGISTRATION_MODE_CONTINOUS,
             REGISTRATION_MODE_SINGLE
         }
-
-        public static void ApiFpMmGetIdReq(MessageBus bus) {
+        internal static void ApiFpMmGetIdReq(API_FP_MM fpmm) {
             Console.Write("Requesting unique FP ID: ");
-            MessageBusOutgoing.InfoFrame(bus, (ushort)ManagementCommands.GET_ID_REQ, false);
+            fpmm._bus._busout.InfoFrame( (ushort)ManagementCommands.GET_ID_REQ, false);
         }
     }
 }
