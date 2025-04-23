@@ -1,14 +1,15 @@
 using Busmail;
-using HAL = API.API_HAL.API_HAL;
-using FPGen = API.API_FP_GENERAL.API_FP_GENERAL;
+using API.COMMANDS;
 
 namespace API {
     public class API {
-        public FPGen fpgen;
-        public HAL hal;
+        public FP_GENERAL FPGEN;
+        public HAL Hal;
+        public FP_MM FPMM;
         public API(MessageBus bus) {
-            hal = new HAL(bus);
-            fpgen = new FPGen(bus);
+            Hal = new HAL(bus);
+            FPGEN = new FP_GENERAL(bus);
+            FPMM = new FP_MM(bus);
         }
     }
     public class GeneralTypes

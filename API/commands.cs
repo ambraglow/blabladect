@@ -1,6 +1,7 @@
 using Busmail;
 using HALAPI = API.API_HAL.API_HAL;
 using FPGen = API.API_FP_GENERAL.API_FP_GENERAL;
+using FPMM = API.API_FP_MM.API_FP_MM;
 
 namespace API.COMMANDS {
     public class HAL {
@@ -8,20 +9,7 @@ namespace API.COMMANDS {
         internal HAL(MessageBus bus) {
             _hal = new HALAPI(bus);
         }
-        /*
-        internal static string readcommandresponse(MessageBus bus) {
-            if(bus.busData.IncomingframeData.Mail.Length <= 1) return "";
-            ushort CommandResponse = (ushort)(bus.busData.IncomingframeData.Mail[3] << 8);
-            CommandResponse |= bus.busData.IncomingframeData.Mail[2];
-            var ResponseName = Enum.GetName(typeof(HAL.command), CommandResponse);
-            //Console.WriteLine(CommandResponse.ToString("X"));
-            if(ResponseName != null) {
-                return ResponseName;
-            } else {
-                return "";
-            }
-        }
-        */
+
         public void Blink(int duration, int repeat) {
             Command[] blinkcmd =
             [
@@ -45,4 +33,29 @@ namespace API.COMMANDS {
             _fpgen.ApiFpGeneralReset();
         }
     }
+    public class FP_MM {
+        private readonly FPMM _fpmm;
+        internal FP_MM(MessageBus bus) {
+            _fpmm = new FPMM(bus);
+        }
+        public void RequestFPID() {
+            _fpmm.ApiFpMmGetIdReq();
+        }
+    }
+
+    // nvm this garbage i was testing stuff
+    /*
+        internal static string readcommandresponse(MessageBus bus) {
+            if(bus.busData.IncomingframeData.Mail.Length <= 1) return "";
+            ushort CommandResponse = (ushort)(bus.busData.IncomingframeData.Mail[3] << 8);
+            CommandResponse |= bus.busData.IncomingframeData.Mail[2];
+            var ResponseName = Enum.GetName(typeof(HAL.command), CommandResponse);
+            //Console.WriteLine(CommandResponse.ToString("X"));
+            if(ResponseName != null) {
+                return ResponseName;
+            } else {
+                return "";
+            }
+        }
+    */
 }

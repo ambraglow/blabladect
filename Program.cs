@@ -1,16 +1,17 @@
 ﻿using Busmail;
 using API.COMMANDS;
+using API.API_FP_MM;
 
 class Program
 {
     static void Main()
     {
         MessageBus bus = new MessageBus();
-        HAL halcmd = new HAL(bus);
-        FP_GENERAL fpgcmd = new FP_GENERAL(bus);
+        API.API api = new API.API(bus); 
 
         //fpgcmd.software_Reset();
-        halcmd.Blink(200, 2);
-        fpgcmd.Version();
+        api.Hal.Blink(200, 2);
+        api.FPGEN.Version();
+        api.FPMM.RequestFPID();
     }
 }

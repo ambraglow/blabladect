@@ -101,7 +101,6 @@ namespace API.API_FP_GENERAL {
         public void ApiFpGeneralReset()
         {
             _bus.Connected = false;
-            _bus.busData.PollFinal = true;
             _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.RESET_REQ);
         }
 
@@ -111,7 +110,7 @@ namespace API.API_FP_GENERAL {
             _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_FW_VERSION_REQ, false);
         }
 
-        public static void ApiFpGeneralSetTime(API_FP_GENERAL fpgen, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
+        public void ApiFpGeneralSetTime(API_FP_GENERAL fpgen, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
         {
             var apiFpGeneralSetTime = new Command();
             apiFpGeneralSetTime.fields.Add((byte)coding);
@@ -121,16 +120,16 @@ namespace API.API_FP_GENERAL {
                 apiFpGeneralSetTime.fields.Add((byte)elements);
             }
             Console.Write("Sending ApiFpGeneralSetTime Command: ");
-            fpgen._bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
+            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
         }
 
-        public static void ApiFpGeneralGetTime()
+        public void ApiFpGeneralGetTime()
         {
             Console.Write("Sending ApiFpGeneralGetTime Command: ");
-            //MessageBus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_TIME_REQ, false);
+            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_TIME_REQ, false);
         }
 
-        public static void ApiFpGeneralSetTimeInd(ApiTerminalIdType terminalId, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
+        public void ApiFpGeneralSetTimeInd(ApiTerminalIdType terminalId, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
         {
             var apiFpGeneralSetTimeInd = new Command();
             apiFpGeneralSetTimeInd.fields[0] = (byte)terminalId;
@@ -140,7 +139,7 @@ namespace API.API_FP_GENERAL {
             {
                 apiFpGeneralSetTimeInd.fields.Add((byte)elements);
             }
-            //MessageBus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_IND, false,apiFpGeneralSetTimeInd.fields.ToArray());
+            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_IND, false,apiFpGeneralSetTimeInd.fields.ToArray());
         }
     }
 

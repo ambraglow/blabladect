@@ -54,7 +54,7 @@ namespace Busmail
             BusIn.HandleFrameIncoming();
         }
         internal void Clear() {
-            Array.Clear(this.SerialBuf.Read, 0, this.SerialBuf.Read.Length);
+            Array.Clear(SerialBuf.Read, 0, SerialBuf.Read.Length);
             Serial.DiscardInBuffer();
         }
         public byte[] SerializeFrame(BusMailFrame frame)

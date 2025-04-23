@@ -54,9 +54,9 @@ namespace API.API_FP_MM {
             REGISTRATION_MODE_CONTINOUS,
             REGISTRATION_MODE_SINGLE
         }
-        internal static void ApiFpMmGetIdReq(API_FP_MM fpmm) {
+        internal void ApiFpMmGetIdReq() {
             Console.Write("Requesting unique FP ID: ");
-            fpmm._bus.BusOut.InfoFrame( (ushort)ManagementCommands.GET_ID_REQ, false);
+            _bus.BusOut.InfoFrame( (ushort)ManagementCommands.GET_ID_REQ, false);
         }
     }
 }
