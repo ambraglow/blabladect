@@ -50,10 +50,10 @@ namespace Busmail
             if(SerialBuf.Write != null)
                 Serial.Write(SerialBuf.Write, 0, SerialBuf.Write.Length);
             // handle incoming data on serial _bus
-            Thread.Sleep(50);
+            Thread.Sleep(50);   // dio santo che sei nei cieli sia santificato il tuo nome, sia in cielo sia in terra. dacci oggi il nostro pane quotidiano..
             BusIn.HandleFrameIncoming();
         }
-        public void Clear() {
+        internal void Clear() {
             Array.Clear(this.SerialBuf.Read, 0, this.SerialBuf.Read.Length);
             Serial.DiscardInBuffer();
         }
