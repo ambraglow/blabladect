@@ -98,15 +98,17 @@ namespace API.API_FP_GENERAL {
             API_CODING_TIME_DATE
         }
                 
-        public static void ApiFpGeneralReset()
+        public void ApiFpGeneralReset()
         {
-            //MessageBus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.RESET_REQ);
+            _bus.Connected = false;
+            _bus.busData.PollFinal = true;
+            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.RESET_REQ);
         }
 
-        public static void ApiFpGeneralGetVersion(API_FP_GENERAL fpgen)
+        public void ApiFpGeneralGetVersion()
         {
             Console.Write("Sending GetVersion command: ");
-            fpgen._bus._busout.InfoFrame((ushort)API_FP_GENERAL.command.GET_FW_VERSION_REQ, true);
+            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_FW_VERSION_REQ, false);
         }
 
         public static void ApiFpGeneralSetTime(API_FP_GENERAL fpgen, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
@@ -119,7 +121,7 @@ namespace API.API_FP_GENERAL {
                 apiFpGeneralSetTime.fields.Add((byte)elements);
             }
             Console.Write("Sending ApiFpGeneralSetTime Command: ");
-            fpgen._bus._busout.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
+            fpgen._bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
         }
 
         public static void ApiFpGeneralGetTime()

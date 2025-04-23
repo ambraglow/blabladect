@@ -108,9 +108,9 @@ namespace API.API_HAL {
             var apiHalDeviceControlReq = new Command();
             apiHalDeviceControlReq.fields.Add((byte)idType);
             apiHalDeviceControlReq.fields.Add((byte)controlType);
-            _bus._busout.InfoFrame((ushort)command.DEVICE_CONTROL_REQ, false, apiHalDeviceControlReq.fields.ToArray());
+            _bus.BusOut.InfoFrame((ushort)command.DEVICE_CONTROL_REQ, false, apiHalDeviceControlReq.fields.ToArray());
         }
-        internal static void ApiHalLedReq(API_HAL hal, int led, Command[] Commands)
+        internal void ApiHalLedReq(int led, Command[] Commands)
         {
             Console.Write("sending LedReq command: ");
             List<byte> parameters = new List<byte>() {(byte)led, (byte)Commands.Length};
@@ -120,7 +120,7 @@ namespace API.API_HAL {
                 parameters.Add(cmd.fields[1]);
                 parameters.Add(cmd.fields[2]);
             }
-            hal._bus._busout.InfoFrame((ushort)command.LED_REQ, false, parameters.ToArray());
+            _bus.BusOut.InfoFrame((ushort)command.LED_REQ, false, parameters.ToArray());
         }
         internal Command ApiHalLedCmd(ApiHalLedCmdIdType id, int duration)
         {

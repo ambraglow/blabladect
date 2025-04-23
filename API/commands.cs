@@ -5,8 +5,8 @@ using FPGen = API.API_FP_GENERAL.API_FP_GENERAL;
 namespace API.COMMANDS {
     public class HAL {
         private readonly HALAPI _hal;
-        public HAL(MessageBus bus) {
-            this._hal =  new HALAPI(bus);
+        internal HAL(MessageBus bus) {
+            _hal = new HALAPI(bus);
         }
         /*
         internal static string readcommandresponse(MessageBus bus) {
@@ -29,17 +29,20 @@ namespace API.COMMANDS {
                 _hal.ApiHalLedCmd(HALAPI.ApiHalLedCmdIdType.ALI_LED_OFF, duration), 
                 _hal.ApiHalLedCmd(HALAPI.ApiHalLedCmdIdType.ALI_LED_REPEAT_SEQUENCE, repeat)
             ];
-            HALAPI.ApiHalLedReq(_hal, 2, blinkcmd);
+            _hal.ApiHalLedReq(2, blinkcmd);
         }
     }
     public class FP_GENERAL {
         private readonly FPGen _fpgen;
-        public FP_GENERAL(MessageBus bus) {
-            this._fpgen =  new FPGen(bus);
+        internal FP_GENERAL(MessageBus bus) {
+            _fpgen = new FPGen(bus);
         }
         public void Version() {
             // Send command
-            FPGen.ApiFpGeneralGetVersion(_fpgen);
+            _fpgen.ApiFpGeneralGetVersion();
+        }
+        public void software_Reset() {
+            _fpgen.ApiFpGeneralReset();
         }
     }
 }
