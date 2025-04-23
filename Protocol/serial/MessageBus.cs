@@ -132,7 +132,6 @@ namespace Busmail
         internal MessageBusIncoming(MessageBus bus) {
             _bus = bus;
         }
-        static readonly object _locker = new object();
         private static System.Timers.Timer _pfTimer = new (interval: 1000);
         internal static void TimerTimeout(Object sender, ElapsedEventArgs e, MessageBus _bus)
         {
@@ -152,14 +151,14 @@ namespace Busmail
                 _bus.Write(_bus.busData.SavedFrame);
             }
         }
-        internal static void TimerStart(MessageBus _bus) {
+        internal void TimerStart() {
             _pfTimer.Elapsed += (sender, e) => TimerTimeout(sender!, e, _bus);
             _pfTimer.Enabled = true;
             _pfTimer.Start();
         }
-        internal static Err HandleFrameIncoming(MessageBus _bus) {
+        internal Err HandleFrameIncoming() {
             if(_bus.busData.PollFinal == true){
-                TimerStart(_bus);
+                TimerStart();
                 Debug.WriteLine("Timer started.");
             }
             Console.ForegroundColor = ConsoleColor.Red;
