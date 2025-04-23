@@ -47,7 +47,7 @@ namespace Busmail
             if(SerialBuf.Write != null)
                 Serial.Write(SerialBuf.Write, 0, SerialBuf.Write.Length);
             // handle incoming data on serial _bus
-            MessageBusIncoming.HandleFrameIncoming(this);
+            _busin.HandleFrameIncoming();
         }
         public void Clear() {
             if(this.SerialBuf.Read != null)
