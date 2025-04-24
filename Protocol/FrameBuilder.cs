@@ -59,7 +59,7 @@ namespace Busmail
             return frame;
         }
 
-        private static byte CalculateChecksum(BusMailFrame frame) => frame.Mail.Aggregate(frame.Header, (acc, b) => (byte)(acc + b));
+        internal static byte CalculateChecksum(BusMailFrame frame) => frame.Mail.Aggregate(frame.Header, (acc, b) => (byte)(acc + b));
 
         private static void BuildInformationHeader(ref byte header, bool pollFinal)
         {

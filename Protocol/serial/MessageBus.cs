@@ -2,16 +2,20 @@ using System.IO.Ports;
 using System.Timers;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Net.Mail;
+using System.Runtime.CompilerServices;
 
 namespace Busmail
 {
     public class MessageBus
     {
-        SerialPort Serial { get; set; }
+        internal SerialPort Serial { get; set; }
         public Buffer SerialBuf = new Buffer();
         public Data busData = new Data();
         public bool Connected = false;
-
+        public bool FrameIncomplete = false;
+        internal System.Timers.Timer _retxTimer = new (interval: 1000);
         internal MessageBusOutgoing BusOut;
         internal MessageBusIncoming BusIn;
         
@@ -24,12 +28,32 @@ namespace Busmail
             Init();
             BusOut.Connect();
         }
-
         private void Init(){
+            Serial.Handshake = Handshake.None;
+            Serial.DataReceived += new SerialDataReceivedEventHandler(HandleDataReceived);
             Serial.Open();
-            SerialBuf.Read = new byte[50];
         }
-
+        private void HandleDataReceived(object sender, SerialDataReceivedEventArgs e) {
+            if(FrameIncomplete == true)
+                BusOut.Retransmit();
+            SerialPort sp = (SerialPort)sender;
+            int length = sp.BytesToRead;
+            if(length > 2){
+                SerialBuf.Read = new byte[length];
+                Read(length, 0);
+                //Console.WriteLine("content read: "+BitConverter.ToString(SerialBuf.Read));
+                switch(BusIn.HandleSerialBuffer())
+                {
+                    case Err.Success:
+                        FrameIncomplete = false;
+                        break;
+                    case Err.Invalid:
+                        FrameIncomplete = true;
+                        break;
+                }
+                Clear();
+            }
+        }
         internal void Read(int length, int offset)
         {
             try {
@@ -38,7 +62,7 @@ namespace Busmail
             catch (ArgumentException e) 
             {
                 throw new ArgumentOutOfRangeException(
-                    "blabla", e);
+                    "whoops", e);
             }
         }
         internal void Write(BusMailFrame frame)
@@ -46,20 +70,20 @@ namespace Busmail
             // serialize
             SerializeFrame(frame);
             busData.SavedFrame = frame;
-            // write to _bus
+            // write to bus
             if(SerialBuf.Write != null)
                 Serial.Write(SerialBuf.Write, 0, SerialBuf.Write.Length);
             // handle incoming data on serial _bus
             Thread.Sleep(50);   // dio santo che sei nei cieli sia santificato il tuo nome, sia in cielo sia in terra. dacci oggi il nostro pane quotidiano..
-            BusIn.HandleFrameIncoming();
         }
         internal void Clear() {
-            Array.Clear(SerialBuf.Read, 0, SerialBuf.Read.Length);
+            SerialBuf.Read = [];
             Serial.DiscardInBuffer();
         }
         public byte[] SerializeFrame(BusMailFrame frame)
         {
             SerialBuf.Write = new byte[frame.Length + 4];
+            SerialBuf.Write[0] = (byte)BusMailFrame.FrameChar;
             SerialBuf.Write[1] = (byte)(frame.Length >> 8);
             SerialBuf.Write[2] = (byte)(frame.Length & 0xFF);
             SerialBuf.Write[3] = frame.Header;
@@ -102,13 +126,58 @@ namespace Busmail
             var informationFrame = FrameBuilder.BuildFrame(FrameType.Information, data, pf);
             _bus.Write(informationFrame);
         }
-        public void SupervisoryFrame(bool pf = false) {
-            var Supervisory = FrameBuilder.BuildFrame(FrameType.Supervisory, null, pf, SupervisorId.ReceiveReady);
+        public void SupervisoryFrame(SupervisorId type, bool pf = false) {
+            var Supervisory = FrameBuilder.BuildFrame(FrameType.Supervisory, null, pf, type);
             _bus.busData.PollFinal = pf;
             _bus.Write(Supervisory);
         }
+        /*
+        internal void TimerStart() {
+            Debug.WriteLine("Attemtpting to retransmit frames, starting timer");
+            _bus._retxTimer.Elapsed += (sender, e) => _bus.BusOut.Retransmit(sender!, e);
+            _bus._retxTimer.Enabled = true;
+            _bus._retxTimer.Start();
+        }
+        */
+        internal void Retransmit() {
+            if(_bus.busData.Lost == 6) {
+                _bus.busData.PollFinal = false;
+                _bus._retxTimer.Stop();
+                Debug.WriteLine("Timer elapsed (max lost packets count)");
+            } else {
+                    _bus.busData.Lost++;
+            }
+            Debug.Write("Retransmitting frame: ");
+            _bus.Write(_bus.busData.SavedFrame);
+            Thread.Sleep(1000);
+        }
+        /*
+        private void Retransmit(Object sender, ElapsedEventArgs e)
+        {
+            if(_bus.Connected == true) {
+                if(_bus.busData.Lost == 6) {
+                    _bus.busData.PollFinal = false;
+                    _bus._retxTimer.Stop();
+                    Debug.WriteLine("Timer elapsed (max lost packets count)");
+                } else {
+                    _bus.busData.Lost++;
+                }
+                _bus.Write(_bus.busData.SavedFrame);
+            }
+            else {
+                if(_bus.busData.Lost == 6) {
+                    _bus.busData.PollFinal = false;
+                    _bus._retxTimer.Stop();
+                    Debug.WriteLine("Timer elapsed (max lost packets count)");
+                } else {
+                    _bus.busData.Lost++;
+                }
+                SyncFrame(true);
+            }
+        }
+        */
         public void Connect(){
-            if(_bus.Connected == false && _bus.busData.Lost != 6){
+            if(_bus.Connected == false){
                 Console.Write("Connecting... Sending SABM frame: ");
                 SyncFrame(true);
                 while(true){
@@ -117,7 +186,7 @@ namespace Busmail
                         break;
                     } 
                     else if(_bus.Connected == false) {
-                        //MessageBusOutgoing.SyncFrame(_bus, true);
+                        Retransmit();
                     }
                 }
             }
@@ -131,29 +200,94 @@ namespace Busmail
         }
         private static System.Timers.Timer _pfTimer = new (interval: 1000);
         private static byte ExtractHeaderType(byte value) => (byte)(value & (3 << 6));
-        private void TimerTimeout(Object sender, ElapsedEventArgs e)
-        {
-            if(_bus.Connected == true /*&& _bus.busData.IncomingPollFinal == false*/) {
-                _bus.busData.PollFinal = false;
-                _pfTimer.Stop();
-                Debug.WriteLine("Timer stopped.");
-            } else {
-                Console.Write("Resending frame: ");
-                if(_bus.busData.Lost == 6) {
-                    _bus.busData.PollFinal = false;
-                    _pfTimer.Stop();
-                    Debug.WriteLine("Timer elapsed (max lost packets count)");
-                } else {
-                    _bus.busData.Lost++;
+        private static T ExtractFromQuery<T>(IEnumerable<T> query) {
+            foreach(var result in query){
+                return result;
+            }
+            return default(T);
+        }
+        internal Err HandleSerialBuffer() {
+            // find delimiter first, do the rest if it's present
+            var QueryFrameChar = _bus.SerialBuf.Read.OfType<byte>().Where(delimiter => delimiter == BusMailFrame.FrameChar);
+            var delimiter = ExtractFromQuery<byte>(QueryFrameChar);
+            if(delimiter != 0) {
+                var length = _bus.SerialBuf.Read.OfType<byte>().SkipWhile(length => length != delimiter).ElementAt(2);
+                _bus.busData.IncomingframeData.Length = (ushort)(length-1);
+
+                var HeaderQuery = _bus.SerialBuf.Read.OfType<byte>()
+                    .Where(header => ExtractHeaderType(header) == (byte)FrameType.Unnumbered  
+                                || ExtractHeaderType(header) == (byte)FrameType.Supervisory 
+                                || ExtractHeaderType(header) ==  (byte)FrameType.Information)
+                    .ElementAt(3);
+                _bus.busData.IncomingframeData.Header = HeaderQuery;
+
+                var MailQuery = _bus.SerialBuf.Read.Skip(4)
+                    .ToArray();
+                
+                if(MailQuery.Length == 1) {
+                    _bus.busData.IncomingframeData.Mail = new byte[1]{0};
+                    _bus.busData.IncomingframeData.Checksum = _bus.busData.IncomingframeData.Header;
+
+                    if(_bus.busData.IncomingframeData.Checksum != FrameBuilder.CalculateChecksum(_bus.busData.IncomingframeData)) {
+                        Console.WriteLine("received incomplete frame");
+                        return Err.InvalidMessage;
+                    }
+                    else 
+                    {
+                        FrameBreakdown();
+                        return Err.Success;
+                    }
                 }
-                _bus.Write(_bus.busData.SavedFrame);
+                else 
+                {
+                    _bus.busData.IncomingframeData.Mail = new byte[MailQuery.Length-1];
+                    Array.Copy(MailQuery, _bus.busData.IncomingframeData.Mail, MailQuery.Length-1);
+
+                    var ChecksumQuery = _bus.SerialBuf.Read.OfType<byte>()
+                        .Where(checksum => checksum == FrameBuilder.CalculateChecksum(_bus.busData.IncomingframeData));
+                    
+                    if(ExtractFromQuery(ChecksumQuery) != FrameBuilder.CalculateChecksum(_bus.busData.IncomingframeData)) {
+                        Console.WriteLine("received incomplete frame");
+                        return Err.InvalidMessage;
+                    }
+                    else {
+                        FrameBreakdown();
+                        return Err.Success;
+                    }
+                }
+            }
+            else
+            {
+                return Err.Invalid;
             }
         }
-        private void TimerStart() {
-            _pfTimer.Elapsed += (sender, e) => TimerTimeout(sender!, e);
-            _pfTimer.Enabled = true;
-            _pfTimer.Start();
+        private void FrameBreakdown() {
+            DebugPrint();
+            switch (ExtractHeaderType(_bus.busData.IncomingframeData.Header)) {
+                case (byte)FrameType.Unnumbered:
+                    //Console.WriteLine("Type Unnumbered ");
+                    if(_bus.busData.IncomingframeData.Header == 0xc0) {
+                        _bus.Connected = true;
+                    }
+                    break;
+                case (byte)FrameType.Information:
+                    //Console.WriteLine("Type Information ");
+                    break;
+                case (byte)FrameType.Supervisory:
+                    //Console.WriteLine("Type Supervisory ");
+                    break;
+            }
         }
+        private void DebugPrint() {
+            Debug.Write("-----------------------\n"+
+                "inc frame\n"+
+                "Header "+_bus.busData.IncomingframeData.Header.ToString("X")+"\n"+
+                "Mail "+BitConverter.ToString(_bus.busData.IncomingframeData.Mail)+"\n"+
+                "Checksum "+_bus.busData.IncomingframeData.Checksum.ToString("X")+"\n"+
+                "-----------------------\n"
+            );
+        }
+        /*
         internal void HandleFrameIncoming() {
             if(_bus.busData.PollFinal == true){
                 TimerStart();
@@ -183,7 +317,21 @@ namespace Busmail
                             Console.Write("Type Information ");
                             InfoHeader(length, totallength);
                             break;
-                        case (byte)FrameType.Supervisory:
+                   switch (ExtractHeaderType(_bus.busData.IncomingframeData.Header)) {
+                case (byte)FrameType.Unnumbered:
+                    Console.WriteLine("Type Unnumbered ");
+                    if(_bus.busData.IncomingframeData.Header == 0xc0) {
+                        _bus.Connected = true;
+                    }
+                    break;
+                case (byte)FrameType.Information:
+                    Console.WriteLine("Type Information ");
+                    break;
+                case (byte)FrameType.Supervisory:
+                    Console.WriteLine("Type Supervisory ");
+                    break;
+            }
+                 case (byte)FrameType.Supervisory:
                             Console.Write("Type Supervisory ");
                             SupervisoryHeader(length, totallength);
                             break;
@@ -199,6 +347,7 @@ namespace Busmail
             Console.ResetColor();
             //IncomingHeader(_bus);
         }
+        */
         private void SupervisoryHeader(int length, int lengthtotal) {
             _bus.Read(length, 4);
             Array.Copy(_bus.SerialBuf.Read, 4, _bus.busData.IncomingframeData.Mail, 0, length-2);
@@ -223,7 +372,6 @@ namespace Busmail
             }
             */
         }
-
         private void UnnumberedHeader(int length, int lengthtotal) {
             _bus.Read(length, 4);
             _bus.busData.IncomingframeData.Checksum = _bus.SerialBuf.Read[lengthtotal];
