@@ -60,7 +60,6 @@ namespace Busmail
         public byte[] SerializeFrame(BusMailFrame frame)
         {
             SerialBuf.Write = new byte[frame.Length + 4];
-            SerialBuf.Write[0] = frame.FrameChar;
             SerialBuf.Write[1] = (byte)(frame.Length >> 8);
             SerialBuf.Write[2] = (byte)(frame.Length & 0xFF);
             SerialBuf.Write[3] = frame.Header;
@@ -131,6 +130,7 @@ namespace Busmail
             _bus = bus;
         }
         private static System.Timers.Timer _pfTimer = new (interval: 1000);
+        private static byte ExtractHeaderType(byte value) => (byte)(value & (3 << 6));
         private void TimerTimeout(Object sender, ElapsedEventArgs e)
         {
             if(_bus.Connected == true /*&& _bus.busData.IncomingPollFinal == false*/) {
@@ -163,8 +163,7 @@ namespace Busmail
                 // scan for delimiter
                 _bus.Read(1, 0);
                 // check if the byte read is a frame delimeter
-                if(_bus.SerialBuf.Read[0] == 0x10){
-                    _bus.busData.IncomingframeData.FrameChar = _bus.SerialBuf.Read[0];
+                if(_bus.SerialBuf.Read[0] == BusMailFrame.FrameChar){
                     // read 3 more bytes (length, header) at ReadBuf[1]
                     _bus.Read(3, 1);
                     _bus.busData.IncomingframeData.Length = _bus.SerialBuf.Read[2];
@@ -175,7 +174,7 @@ namespace Busmail
                     var totallength = length+2;
                     _bus.busData.IncomingframeData.Mail = new byte[_bus.busData.IncomingframeData.Length];           
                     // check the header type, ( '& (3<<6)' removes useless bits)
-                    switch (_bus.SerialBuf.Read[3] & (3<<6)) {
+                    switch (ExtractHeaderType(_bus.busData.IncomingframeData.Header)) {
                         case (byte)FrameType.Unnumbered:
                             Console.Write("Type Unnumbered ");
                             UnnumberedHeader(length, totallength);

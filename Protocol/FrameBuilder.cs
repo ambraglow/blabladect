@@ -22,10 +22,7 @@ namespace Busmail
 
         public static BusMailFrame BuildFrame(FrameType type, byte[] data = null, bool pollFinal = false, SupervisorId Id = SupervisorId.ReceiveNotReady)
         {
-            BusMailFrame frame = new BusMailFrame
-            {
-                FrameChar = 0x10
-            };
+            BusMailFrame frame = new BusMailFrame();
             switch (type)
             {
                 case FrameType.Supervisory:

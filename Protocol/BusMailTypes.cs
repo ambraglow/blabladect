@@ -2,7 +2,7 @@ namespace Busmail
 {
     public struct BusMailFrame
     {
-        public byte FrameChar;
+        public const byte FrameChar = 0x10;
         public ushort Length;
         public byte Header;
         public byte[] Mail;
