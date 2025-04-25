@@ -56,7 +56,7 @@ namespace API.API_FP_MM {
         }
         internal void ApiFpMmGetIdReq() {
             Console.Write("Requesting unique FP ID: ");
-            _bus.BusOut.InfoFrame( (ushort)ManagementCommands.GET_ID_REQ, false);
+            _bus.Transmit.InfoFrame( (ushort)ManagementCommands.GET_ID_REQ, false);
         }
     }
 }
