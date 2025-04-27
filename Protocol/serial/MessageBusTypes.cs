@@ -6,6 +6,7 @@ namespace Busmail {
     public class Data {
         public BusMailFrame SavedFrame;
         public BusMailFrame IncomingframeData;
+        public string IncomingFrameType;
         private int _lost = 0;
         public int Lost {
             get => _lost;
