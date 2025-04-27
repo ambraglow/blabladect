@@ -1,8 +1,6 @@
 ﻿using Busmail;
-using API.COMMANDS;
-using API.API_FP_MM;
 
-class Program
+class TestProgram
 {
     static void Main()
     {

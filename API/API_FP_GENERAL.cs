@@ -101,13 +101,13 @@ namespace API.API_FP_GENERAL {
         public void ApiFpGeneralReset()
         {
             _bus.Connected = false;
-            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.RESET_REQ);
+            _bus.Transmit.InfoFrame((ushort)API_FP_GENERAL.command.RESET_REQ);
         }
 
         public void ApiFpGeneralGetVersion()
         {
             Console.Write("Sending GetVersion command: ");
-            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_FW_VERSION_REQ, false);
+            _bus.Transmit.InfoFrame((ushort)API_FP_GENERAL.command.GET_FW_VERSION_REQ, false);
         }
 
         public void ApiFpGeneralSetTime(API_FP_GENERAL fpgen, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
@@ -120,13 +120,13 @@ namespace API.API_FP_GENERAL {
                 apiFpGeneralSetTime.fields.Add((byte)elements);
             }
             Console.Write("Sending ApiFpGeneralSetTime Command: ");
-            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
+            _bus.Transmit.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_REQ, false,apiFpGeneralSetTime.fields.ToArray());
         }
 
         public void ApiFpGeneralGetTime()
         {
             Console.Write("Sending ApiFpGeneralGetTime Command: ");
-            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.GET_TIME_REQ, false);
+            _bus.Transmit.InfoFrame((ushort)API_FP_GENERAL.command.GET_TIME_REQ, false);
         }
 
         public void ApiFpGeneralSetTimeInd(ApiTerminalIdType terminalId, ApiTimeDateCodingType coding, ApiTimeDateInterpretationType interpretation, ApiTimeDateCodeType timestamp)
@@ -139,7 +139,7 @@ namespace API.API_FP_GENERAL {
             {
                 apiFpGeneralSetTimeInd.fields.Add((byte)elements);
             }
-            _bus.BusOut.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_IND, false,apiFpGeneralSetTimeInd.fields.ToArray());
+            _bus.Transmit.InfoFrame((ushort)API_FP_GENERAL.command.SET_TIME_IND, false,apiFpGeneralSetTimeInd.fields.ToArray());
         }
     }
 

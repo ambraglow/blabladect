@@ -108,7 +108,7 @@ namespace API.API_HAL {
             var apiHalDeviceControlReq = new Command();
             apiHalDeviceControlReq.fields.Add((byte)idType);
             apiHalDeviceControlReq.fields.Add((byte)controlType);
-            _bus.BusOut.InfoFrame((ushort)command.DEVICE_CONTROL_REQ, false, apiHalDeviceControlReq.fields.ToArray());
+            _bus.Transmit.InfoFrame((ushort)command.DEVICE_CONTROL_REQ, false, apiHalDeviceControlReq.fields.ToArray());
         }
         internal void ApiHalLedReq(int led, Command[] Commands)
         {
@@ -120,7 +120,7 @@ namespace API.API_HAL {
                 parameters.Add(cmd.fields[1]);
                 parameters.Add(cmd.fields[2]);
             }
-            _bus.BusOut.InfoFrame((ushort)command.LED_REQ, false, parameters.ToArray());
+            _bus.Transmit.InfoFrame((ushort)command.LED_REQ, false, parameters.ToArray());
         }
         internal Command ApiHalLedCmd(ApiHalLedCmdIdType id, int duration)
         {
@@ -140,7 +140,7 @@ namespace API.API_HAL {
             apiHalRead.fields.Add((byte)(address >> 0x18));
             apiHalRead.fields.Add((byte)(length & 0xFF));
             apiHalRead.fields.Add((byte)(length >> 8));
-            //_busout.InfoFrame((ushort)command.READ_REQ, false, apiHalRead.fields.ToArray());
+            //_Transmit.InfoFrame((ushort)command.READ_REQ, false, apiHalRead.fields.ToArray());
         }
 
         internal void ApiHalWriteReq(ApiHalAreaType area, uint address, ushort length)
@@ -153,7 +153,7 @@ namespace API.API_HAL {
             apiHalRead.fields.Add((byte)(address >> 0x18));
             apiHalRead.fields.Add((byte)(length & 0xFF));
             apiHalRead.fields.Add((byte)(length >> 8));
-            //_busout.InfoFrame((ushort)command.WRITE_REQ, false, apiHalRead.fields.ToArray());
+            //_Transmit.InfoFrame((ushort)command.WRITE_REQ, false, apiHalRead.fields.ToArray());
         }
         
         // more functions can be added as needed
